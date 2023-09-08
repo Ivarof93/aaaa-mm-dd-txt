@@ -1,0 +1,44 @@
+import tkinter as tk
+from tkinter import filedialog
+from dateutil.parser import parse
+import re
+
+
+def cambiar_formato_fecha():
+    archivo_entrada = filedialog.askopenfilename(title="Selecciona el archivo de entrada",
+                                                 filetypes=[("Archivos de texto", "*.txt")])
+    archivo_salida = filedialog.asksaveasfilename(title="Selecciona la ubicación del archivo de salida",
+                                                  filetypes=[("Archivos de texto", "*.txt")])
+
+    if archivo_entrada and archivo_salida:
+        with open(archivo_entrada, 'r') as archivo_entrada, open(archivo_salida, 'w') as archivo_salida:
+            for linea in archivo_entrada:
+                # Busca todas las cadenas que parezcan ser fechas
+                fechas = re.findall(r'\d{1,4}[./-]\d{1,2}[./-]\d{2,4}', linea)
+
+                if fechas:
+                    for fecha in fechas:
+                        try:
+                            # Intenta analizar la fecha en diferentes formatos
+                            fecha_parseada = parse(fecha)
+                            nueva_fecha = fecha_parseada.strftime('%Y-%m-%d')
+                            linea = linea.replace(fecha, nueva_fecha)
+                        except ValueError:
+                            # Si no se puede analizar la fecha, no la cambiamos
+                            pass
+
+                archivo_salida.write(linea)
+
+        mensaje_label.config(text="Fechas cambiadas y guardadas en el archivo de salida")
+
+
+ventana = tk.Tk()
+ventana.title("Cambiar Formato de Fechas")
+
+boton_cambiar_formato = tk.Button(ventana, text="Cambiar Formato de Fechas", command=cambiar_formato_fecha)
+boton_cambiar_formato.pack(pady=20)
+
+mensaje_label = tk.Label(ventana, text="")
+mensaje_label.pack()
+
+ventana.mainloop()
